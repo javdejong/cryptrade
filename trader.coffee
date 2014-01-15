@@ -20,7 +20,7 @@ class Trader
         logger.info message
       warn: (message)->
         logger.info message
-      buy: (instrument,amount,cb)=>
+      buy: (instrument,amount,price,time,cb)=>
         @trade
           at: @data.at
           asset: instrument.asset()
@@ -28,8 +28,10 @@ class Trader
           platform: instrument.platform
           type: 'buy'
           amount: amount
+          price:price
+          time:time
         ,cb
-      sell: (instrument,amount,cb)=>
+      sell: (instrument,amount,price,time,cb)=>
         @trade
           at: @data.at
           asset: instrument.asset()
@@ -37,6 +39,8 @@ class Trader
           platform: instrument.platform
           type: 'sell'
           amount: amount
+          price:price
+          time:time
         ,cb
       plot: (series)->
         # do nothing
@@ -94,11 +98,13 @@ class Trader
     platform = order.platform
     switch order.type
       when 'buy'
-        order.price = @ticker.buy
+        order.price ?= @ticker.buy
+        order.time ?= @config.check_order_interval
         order.maxAmount = order.amount or @sandbox.portfolio.positions[order.curr].amount / order.price
         break
       when 'sell'
-        order.price = @ticker.sell
+        order.price ?= @ticker.sell
+        order.time ?= @config.check_order_interval
         order.maxAmount = order.amount or @sandbox.portfolio.positions[order.asset].amount
         break
     platform.trade order, (err,orderId)=>
@@ -140,7 +146,7 @@ class Trader
             if err?
               logger.error err
             if active
-              logger.info "Canceling order ##{orderId} as it was inactive for #{@config.check_order_interval} seconds."
+              logger.info "Canceling order ##{orderId} as it was inactive for #{order.time} seconds."
               platform.cancelOrder orderId, (err)=>
                 if err?
                   logger.error err
@@ -151,7 +157,7 @@ class Trader
                       @trade order, cb
             else
               orderCb()
-        ,@config.check_order_interval*1000
+        ,order.time*1000
       else
         orderCb()
 
