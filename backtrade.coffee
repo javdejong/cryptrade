@@ -1,4 +1,4 @@
-require "underscore"
+_ = require "underscore"
 fs = require "fs"
 CoffeeScript = require 'coffee-script'
 CSON = require 'cson'
@@ -7,10 +7,17 @@ Trader = require './trader'
 logger = require 'winston'
 Fiber = require 'fibers'
 deepclone = require('./utils').deepclone
+vm = require 'vm'
+uneval = require 'uneval'
+Population = require './population'
 
 # TODO: Also make logger log to file? Although not really necessary for backtesting
 logger.remove logger.transports.Console
-logger.add logger.transports.Console,{level:'info',colorize:true,timestamp:true}
+logger.add logger.transports.Console,{level:'warning',colorize:true,timestamp:true}
+
+
+random_interval = (from,to) ->
+  Math.random() * (to - from) + from
 
 if require.main == module
   program = require('commander')
@@ -49,6 +56,8 @@ if require.main == module
   source = program.args[1]
   code = fs.readFileSync source,
     encoding: 'utf8'
+
+
   name = basename source,'.coffee'
   unless code?
     logger.error "Unable load source code from #{source}"
@@ -81,68 +90,43 @@ if require.main == module
     bare:true
   logger.info 'Starting backtest...'
 
-  # Intialize a trader instance, no key
-  trader = new Trader name,config,null,script
+  initTrader = ->
+    trader = new Trader name,config,null,script
+    trader
 
-  # Ready the initial data
-  elems = ["open", "close", "high", "low", "volumes", "ticks"]
+  runTrader = (trader) ->
+    # Initialize the trader with the initial data
+    bars = deepclone data
 
-  # TODO: Old code, we can probably get rid of it
-  if not newdatatype
-    instrument = data[config.instrument]
-    data.instruments[0] = instrument # Fix the reference
-
-    length_end = instrument.open.length
-
-    temp = deepclone(data) # We don't want to ruin the original data
-    temp_instrument = temp[config.instrument]
-
-    for el in elems
-      t = instrument[el]
-      temp_instrument[el] = t[...config.init_data_length]
-
-    last_i = temp_instrument.close.length - 1 # Asserted that all arrays are of equal length
-
-    temp_instrument["price"] = temp_instrument.close[last_i]
-    temp_instrument["volume"] = temp_instrument.volumes[last_i]
-    temp.at = temp_instrument.ticks[last_i].at
-  else
     length_end = data.length
 
-  Fiber =>
-    # Initialize the trader with the initial data
-    if not newdatatype
-      # TODO: old code, get rid of it
-      bars = deepclone temp_instrument.ticks
-    else
-      bars = deepclone data
-
     trader.init(bars)
-
 
     # Gradually extend the object
     for i in [config.init_data_length...length_end-1]
       # Array stuff
-      if not newdatatype
-        # TODO: old code, get rid of it
-        for el in elems
-          a = instrument[el]
-          b = temp_instrument[el]
-
-          o = deepclone(a[i])
-          b.push(o)
-
-        # Non-array stuff
-        last_i = temp_instrument.close.length - 1 # Asserted that all arrays are of equal length
-
-        temp_instrument["price"] = temp_instrument.close[last_i]
-        temp_instrument["volume"] = temp_instrument.volumes[last_i]
-        temp.at = temp_instrument.ticks[last_i].at
-
-        # Trader gets the last bar = tick
-        bar = temp_instrument.ticks[last_i]
-      else
-        bar = data[i]
+      bar = data[i]
       bar.instrument = config.instrument
       trader.handle bar
+
+
+  generationSize = 1
+  populationSize = 7
+  results = [['Generation', 'Best']]
+
+  Fiber =>
+    population = new Population populationSize, initTrader, runTrader
+
+    i = 1
+    while i < generationSize
+      console.log("Ik oko hier")
+      population.nextGeneration()
+      i++
+
+    console.log("Done!")
   .run()
+
+ 
+
+
+
