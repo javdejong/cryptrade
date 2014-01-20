@@ -90,6 +90,11 @@ class Trader
     result += "#{cash} #{curr.toUpperCase()}"
     result
 
+  getWorthInCurr: ->
+    asset = @data.instruments[0].asset()
+    curr  = @data.instruments[0].curr()
+    amount = @sandbox.portfolio.positions[asset].amount * @ticker.sell + @sandbox.portfolio.positions[curr].amount
+
   trade: (order,cb)->
     platform = order.platform
     switch order.type
@@ -154,6 +159,10 @@ class Trader
         ,@config.check_order_interval*1000
       else
         orderCb()
+
+  getGA: ->
+    # This function returns a reference!
+    @sandbox.GConfig
 
   init: (bars)->
     instrument = @data[@config.instrument]
