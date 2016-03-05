@@ -25,12 +25,12 @@ if require.main == module
     .option('-i,--instrument [value]','Trade instrument (ex. btc_usd)')
     .option('-t,--period [value]','Trading period (ex. 1h)')
     .parse process.argv
-  config = CSON.parseFileSync './config.cson'
+  config = CSON.parseCSONFile './config.cson'
   if program.config?
     logger.info "Loading configuration file configs/#{program.config}.cson.."
-    anotherConfig = CSON.parseFileSync 'configs/'+program.config+'.cson'
+    anotherConfig = CSON.parseCSONFile 'configs/'+program.config+'.cson'
     config = _.extend config,anotherConfig
-  keys = CSON.parseFileSync 'keys.cson'
+  keys = CSON.parseCSONFile 'keys.cson'
   unless keys?
     logger.error 'Unable to open keys.cson'
     process.exit 1

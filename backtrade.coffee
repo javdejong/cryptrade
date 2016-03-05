@@ -30,7 +30,7 @@ if require.main == module
     .option('-f,--fee [value]','Fee on every trade in percent (ex. 0.5)',parseFloat)
     .parse process.argv
 
-  config = CSON.parseFileSync './config.cson'
+  config = CSON.parseCSONFile './config.cson'
 
   # TODO: make this a separate option.
   #       That way, when the user does not have to specify the trade data
@@ -42,7 +42,7 @@ if require.main == module
 
   if program.config?
     logger.info "Loading configuration file configs/#{program.config}.cson.."
-    anotherConfig = CSON.parseFileSync 'configs/'+program.config+'.cson'
+    anotherConfig = CSON.parseCSONFile 'configs/'+program.config+'.cson'
     config = _.extend config,anotherConfig
 
   if program.args.length > 2
