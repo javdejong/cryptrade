@@ -45,16 +45,16 @@ class Trader
         # @TODO add send email functionality
     @script = vm.runInNewContext @script, @sandbox, @name
     _.extend @sandbox,@script
-    platformCls = require('./platforms/'+config.platform)
+    platformCls = require('./platforms/'+@config.platform)
     platform = new platformCls()
     try
-      platform.init config.platforms[config.platform],config.instrument,@account
+      platform.init @config.platforms[@config.platform],@config.instrument,@account
     catch e
       logger.error e.message
       process.exit 1
     @data = {}
     instrument = new Instrument(platform,@config.instrument)
-    @data[config.instrument] = instrument
+    @data[@config.instrument] = instrument
     @data.instruments = [instrument]
     @context = {}
     @sandbox.init @context

@@ -17,14 +17,16 @@ class Genome
     conf = trader.getGA()
 
     @origvalues = deepclone(conf)
-    
+
     if conf?
       if @values?
-        conf = @values     
-      else    
-        conf = @initial(conf)      
+        for a of conf
+          conf[a] = @values[a]
+      else
+        conf = @initial(conf)
 
     traderRun(trader)
+
     @score = trader.getWorthInCurr()
 
 
@@ -34,7 +36,10 @@ class Genome
       Math.random() * (to - from) + from
 
     b = conf[a]
-    conf[a] = b[2](random_interval(b[0],b[1]))    
+    try
+      conf[a] = b[2](random_interval(b[0],b[1]))
+    catch error
+      throw new Error(error)
 
 
   # Creates the initial set of values
@@ -71,7 +76,7 @@ class Genome
     index = @getRandomIndex(value_names)
     item_name = value_names[index]
     values[item_name] = deepclone(@origvalues[item_name])
-    set_value_interval(values,item_name)
+    @set_value_interval(values,item_name)
 
   # Perform a uniform crossover with the given genome
   # A mixingratio of 1.0 means that half/half are mixed. So we divide by two below
