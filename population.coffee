@@ -27,6 +27,7 @@ class Population
   afterGeneration: ->
     console.log("Round ##{@currentGeneration}:")
     console.log(@genomes[@populationSize-1].cost())
+    console.log(@genomes[@populationSize-1].values)
 
 
   # @param [Integer] populationSize The size of the population

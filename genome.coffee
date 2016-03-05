@@ -14,8 +14,9 @@ class Genome
   constructor: (@values, traderInit, traderRun) ->
     trader = traderInit()
 
-    conf = trader.getGA()
+    conf = trader.context.gconfig
 
+    # Somewhat of a hack. Store original functions to be able to mutate ourselves when done.
     @origvalues = deepclone(conf)
 
     if conf?

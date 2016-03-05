@@ -54,10 +54,11 @@ class Trader
       logger.error e.message
       process.exit 1
     @data = {}
-    instrument = new Instrument(platform,@config.instrument)
+    instrument = new Instrument(platform,@config.instrument,@config.init_data_length)
     @data[@config.instrument] = instrument
     @data.instruments = [instrument]
     @context = {}
+    @context.gconfig = new @sandbox.GConfig(@config.init_data_length)
     @sandbox.init @context
 
   updateTicker: (platform,cb)->
@@ -167,10 +168,6 @@ class Trader
       else
         orderCb()
 
-  getGA: ->
-    # This function returns a reference!
-    @sandbox.GConfig
-
   init: (bars)->
     instrument = @data[@config.instrument]
     for bar in bars
@@ -202,6 +199,7 @@ class Trader
 
   clean: ->
     # Delete local variables/closures
+    delete @context.gconfig
     for x of @sandbox
       delete @sandbox[x]
     delete @sandbox

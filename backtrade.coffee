@@ -96,16 +96,11 @@ if require.main == module
 
   runTrader = (trader) ->
     # Initialize the trader with the initial data
-    bars = deepclone data
-
-    length_end = data.length
-
-    trader.init(bars)
+    trader.init(data[...config.init_data_length])
 
     # Gradually extend the object
-    for i in [config.init_data_length...length_end-1]
+    for bar in data[config.init_data_length..]
       # Array stuff
-      bar = data[i]
       bar.instrument = config.instrument
       trader.handle bar
 

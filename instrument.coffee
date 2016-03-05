@@ -2,7 +2,7 @@ _ = require 'underscore'
 talib = require('./talib_sync')
 
 class Instrument
-  constructor: (@platform,@id)->
+  constructor: (@platform,@id,@data_length)->
     @open = []
     @low = []
     @high = []
@@ -18,7 +18,7 @@ class Instrument
     @pair[1]
 
   update: (data)->
-    if @open.length == 1000 # Hold up to 1000 values
+    if @open.length == @data_length
       @open.shift()
       @low.shift()
       @high.shift()
@@ -51,7 +51,7 @@ class Instrument
   ema: (period)->
     output = talib.EMA
       name: 'EMA'
-      startIdx: 0 
+      startIdx: 0
       endIdx: @close.length-1
       inReal: @close
       optInTimePeriod: period
