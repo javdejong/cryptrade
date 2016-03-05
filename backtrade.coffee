@@ -110,23 +110,13 @@ if require.main == module
       trader.handle bar
 
 
-  generationSize = 1
-  populationSize = 7
+  generationSize = 10
+  populationSize = 20
   results = [['Generation', 'Best']]
 
   Fiber =>
     population = new Population populationSize, initTrader, runTrader
 
-    i = 1
-    while i < generationSize
-      console.log("Ik oko hier")
+    for i in [1...generationSize]
       population.nextGeneration()
-      i++
-
-    console.log("Done!")
   .run()
-
- 
-
-
-
