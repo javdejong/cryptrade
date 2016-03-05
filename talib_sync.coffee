@@ -2,7 +2,7 @@ _ = require 'underscore'
 talib = require 'talib'
 Future = require 'fibers/future'
 
-talibWrapper = (func)-> 
+talibWrapper = (func)->
   (params)->
     output = null
     future = new Future()
@@ -26,9 +26,9 @@ talibWrapper = (func)->
     caller(params)
     future.wait()
     output
-    
+
 exports = {}
 for f in talib.functions
   exports[f.name] = talibWrapper(f)
-   
+
 module.exports = exports

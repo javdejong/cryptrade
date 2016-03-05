@@ -1,6 +1,6 @@
 # Base class for a Genome.
-# 
-# Genomes are able to mate and mutate. 
+#
+# Genomes are able to mate and mutate.
 # They contain the logic to get a so called cost which is needed to compare
 # a Population.
 deepclone = require('./utils').deepclone
@@ -47,13 +47,13 @@ class Genome
     @values = conf
 
 
-  
+
   # Compares this genome to the given genome.
   # Comparison is based on cost and therefore a lower cost is better.
   # @param [Genome] genome The genome you want to compare to this one
   # @return [Integer] Returns 1 if this one is better, -1 if the other one is better or 0 when they're the same
   # when they have the same cost
-  
+
   ###
   compare: (genome) ->
     costThis = @cost()
@@ -75,7 +75,7 @@ class Genome
 
   # Perform a uniform crossover with the given genome
   # A mixingratio of 1.0 means that half/half are mixed. So we divide by two below
-  # @param [Genome] genome 
+  # @param [Genome] genome
   # @param [Float] mixingRatio How much should get mixed?
   # @return [Array<Object>] the two new Value objects
 
@@ -99,7 +99,7 @@ class Genome
       cpP2[item_name] = temp
 
       # And remove this fieldname from the array so we don't choose it again
-      value_names.splice(index, 1)      
+      value_names.splice(index, 1)
 
     return [cpP1, cpP2]
 

@@ -9,10 +9,10 @@ talib = require './talib_sync'
 
 class Trader
   constructor: (@name,@config,@account,@script)->
-    @sandbox = 
+    @sandbox =
       _:_
       talib: talib
-      portfolio: 
+      portfolio:
         positions: {}
       debug: (message)->
         logger.verbose message
@@ -114,7 +114,7 @@ class Trader
       if orderId
         orderStr = "##{orderId} "
       else
-        orderStr = '' 
+        orderStr = ''
       orderCb = ->
         self.updatePortfolio [order.asset,order.curr], order.platform,(err)=>
           unless err?

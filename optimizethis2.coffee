@@ -41,8 +41,7 @@ handle: (context, data)->
   context.diffs.shift()
 
 #  info 'EMA difference: '+diff.toFixed(3)+' price: '+instrument.price.toFixed(2)
-
   if result.histogram < 0.0
-      sell instrument # Sell asset position 
+      sell instrument # Sell asset position
   if diff > GConfig.buy_threshold
       buy instrument # Spend all amount of cash for asset
