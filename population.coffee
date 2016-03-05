@@ -26,8 +26,7 @@ class Population
 
   afterGeneration: ->
     console.log("Round ##{@currentGeneration}:")
-    for genome in @genomes
-      console.log(genome.cost())
+    console.log(@genomes[@populationSize-1].cost())
 
 
   # @param [Integer] populationSize The size of the population
@@ -67,8 +66,6 @@ class Population
     nextGeneration = []
     skip = 0
     @currentGeneration++
-    
-    console.log("jo wassup")
 
     # the fittest two survive
     if @elitism
@@ -76,7 +73,6 @@ class Population
       nextGeneration.push(new Genome(@genomes[@genomes.length - 1].values, @traderInit, @traderRun))
       nextGeneration.push(new Genome(@genomes[@genomes.length - 2].values, @traderInit, @traderRun))
       skip = 2
-    console.log("en dat waren er weer twee")
 
     for index in [0...@genomes.length-skip] by 2
       # do a tournament selection
@@ -97,8 +93,6 @@ class Population
       # add the new genomes to the next generation
       nextGeneration.push(new Genome(c1, @traderInit, @traderRun))
       nextGeneration.push(new Genome(c2, @traderInit, @traderRun))
-
-    console.log("en nog eens wat")
 
     @genomes = nextGeneration
 
