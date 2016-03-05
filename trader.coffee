@@ -198,5 +198,14 @@ class Trader
           Fiber =>
             @sandbox.handle @context, @data
           .run()
-    
+
+  clean: ->
+    # Delete local variables/closures
+    for x of @sandbox
+      delete @sandbox[x]
+    delete @sandbox
+    delete @instrument
+    delete @script
+    delete @platform
+
 module.exports = Trader

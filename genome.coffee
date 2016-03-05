@@ -29,6 +29,7 @@ class Genome
 
     @score = trader.getWorthInCurr()
 
+    trader.clean()
 
   set_value_interval: (conf,a) ->
 
