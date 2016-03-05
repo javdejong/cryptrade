@@ -12,6 +12,8 @@ talibWrapper = (func)->
       talib.execute params, (data)->
         if data.error
           console.log data.error
+          delete params.inReal
+          console.log(params)
           throw new Error(data.error)
         else
           outputs = _.keys(data.result)
