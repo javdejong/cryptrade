@@ -14,6 +14,7 @@ class Trader
       talib: talib
       portfolio:
         positions: {}
+      myprint: (message)-> console.log(message)
       debug: (message)->
         logger.verbose message
       info: (message)->
