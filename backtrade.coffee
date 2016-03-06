@@ -82,6 +82,9 @@ if require.main == module
   config.init_data_length = program.initial or config.init_data_length
   pl = config.platforms[config.platform]
   pl.fee = program.fee or pl.fee
+
+  [asset, curr] = config.instrument.split('_')
+
   if program.portfolio?
     for x,i in config.instrument.split('_')
       pl.initial_portfolio[x] = program.portfolio[i]
@@ -126,6 +129,20 @@ if require.main == module
       bar.instrument = config.instrument
       trader.handle bar
 
+  getInitWorth = ->
+    price = data[config.init_data_length].close
+    worth = pl.initial_portfolio[asset] * price + pl.initial_portfolio[curr]
+    worth
+
+  logFinalStats = (cur_worth, positions) ->
+    if positions?
+      for x of positions
+        console.log("#{x.toUpperCase()}: #{positions[x].amount}")
+
+    cur_worth = Math.round(1e6 * cur_worth) / 1e6
+    eff_buyhold = Math.round(1000 * cur_worth / getInitWorth()) / 1000
+    console.log("(Total: #{cur_worth} #{curr.toUpperCase()})")
+    console.log("Efficiency: #{eff_buyhold}x")
 
   if program.genetic?
     populationSize = Math.max(program.genetic[0], 1)
@@ -136,6 +153,12 @@ if require.main == module
 
       for i in [1...generationSize]
         population.nextGeneration()
+
+      winner = population.genomes[population.genomes.length-1]
+      cur_worth = winner.cost()
+
+      logFinalStats(cur_worth)
+
     .run()
   else
     Fiber =>
@@ -145,11 +168,6 @@ if require.main == module
       console.log("Finished backtest!")
 
       p = trader.sandbox.portfolio.positions
-      a = undefined;
-      for x of trader.sandbox.portfolio.positions
-        console.log("#{x.toUpperCase()}: #{p[x].amount}")
-        a = x.toUpperCase()
 
-      console.log("(#{trader.getWorthInCurr()} #{a})")
-
+      logFinalStats(trader.getWorthInCurr(), p)
     .run()
