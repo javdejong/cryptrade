@@ -16,7 +16,7 @@ class Trader
         positions: {}
       myprint: (message)-> console.log(message)
       debug: (message)->
-        logger.verbose message
+        logger.info message
       info: (message)->
         logger.info message
       warn: (message)->
@@ -39,7 +39,13 @@ class Trader
           type: 'sell'
           amount: amount
         ,cb
+      askParam: (q, def) ->
+        def
       plot: (series)->
+        # do nothing
+      plotMark: (point)->
+        # do nothing
+      setPlotOptions: (po) ->
         # do nothing
       sendEmail: (text)->
         logger.verbose 'Sending e-mail '+text
@@ -54,6 +60,7 @@ class Trader
       logger.error e.message
       process.exit 1
     @data = {}
+    @storage = {}
     instrument = new Instrument(platform,@config.instrument,@config.init_data_length)
     @data[@config.instrument] = instrument
     @data.instruments = [instrument]
@@ -192,10 +199,10 @@ class Trader
       @updatePortfolio instrument.pair,instrument.platform, =>
         if @config.platform == "backtest"
           # We are already in a fiber
-          @sandbox.handle @context, @data
+          @sandbox.handle @context, @data, @storage
         else
           Fiber =>
-            @sandbox.handle @context, @data
+            @sandbox.handle @context, @data, @storage
           .run()
 
   clean: ->

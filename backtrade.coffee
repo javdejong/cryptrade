@@ -26,6 +26,8 @@ if require.main == module
     .option('-p,--portfolio <asset,curr>','Initial portfolio (ex. 0,5000)',(val)->val.split(',').map(Number))
     .option('-f,--fee [value]','Fee on every trade in percent (ex. 0.5)',parseFloat)
     .option('-g,--genetic <popSize,genSize>','Use genetic algorithm for optimization [0,0]', (val)->val.split(',').map(Number))
+    .option('-b,--begin [value]','Datetime to start the backtest',Date.parse)
+    .option('-e,--end [value]','Datetime to end the backtest (exclusive)',Date.parse)
     .parse process.argv
 
   config = CSON.parseCSONFile './config.cson'
@@ -84,6 +86,26 @@ if require.main == module
     for x,i in config.instrument.split('_')
       pl.initial_portfolio[x] = program.portfolio[i]
 
+
+  # Only slice the amount of data that we need
+  interval = data[1].at - data[0].at
+  if program.begin?
+    start_index = parseInt((program.begin - data[0].at)/interval)
+    start_index = start_index - config.init_data_length
+    if start_index < 0
+      throw new Error("No data available in selected period")
+
+    data = data[start_index..]
+
+  if program.end?
+    end_index = parseInt((program.end - data[0].at)/interval)
+    # Exclusive, so do not include the bar for the period [end,end+1],
+    # which finds itself in our data at t = end.
+    end_index = end_index - 1
+    if end_index > data[data.length-1]
+      throw new Error("No data available in selected period")
+    data = data[..end_index]
+
   script = CoffeeScript.compile code,
     bare:true
   logger.info 'Starting backtest...'
@@ -93,11 +115,13 @@ if require.main == module
     trader
 
   runTrader = (trader) ->
-    # Initialize the trader with the initial data
-    trader.init(data[...config.init_data_length])
+    # Initialize the trader with the initial data. This is one fewer than the
+    # amount of data,  because we make the first call to handle() have exactly
+    # the right number of elements.
+    trader.init(data[...config.init_data_length-1])
 
     # Gradually extend the object
-    for bar in data[config.init_data_length..]
+    for bar in data[config.init_data_length-1..]
       # Array stuff
       bar.instrument = config.instrument
       trader.handle bar
