@@ -58,7 +58,8 @@ class Trader
     @data[@config.instrument] = instrument
     @data.instruments = [instrument]
     @context = {}
-    @context.gconfig = new @sandbox.GConfig(@config.init_data_length)
+    if @sandbox.GConfig?
+      @context.gconfig = new @sandbox.GConfig(@config.init_data_length)
     @sandbox.init @context
 
   updateTicker: (platform,cb)->

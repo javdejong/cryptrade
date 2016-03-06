@@ -25,6 +25,7 @@ if require.main == module
     .option('-s,--initial [value]','Number of trades that are used for initialization (ex. 248)',parseInt)
     .option('-p,--portfolio <asset,curr>','Initial portfolio (ex. 0,5000)',(val)->val.split(',').map(Number))
     .option('-f,--fee [value]','Fee on every trade in percent (ex. 0.5)',parseFloat)
+    .option('-g,--genetic <popSize,genSize>','Use genetic algorithm for optimization [0,0]', (val)->val.split(',').map(Number))
     .parse process.argv
 
   config = CSON.parseCSONFile './config.cson'
@@ -102,13 +103,29 @@ if require.main == module
       trader.handle bar
 
 
-  generationSize = 10
-  populationSize = 20
-  results = [['Generation', 'Best']]
+  if program.genetic?
+    populationSize = Math.max(program.genetic[0], 1)
+    generationSize = Math.max(program.genetic[1], 1)
 
-  Fiber =>
-    population = new Population populationSize, initTrader, runTrader
+    Fiber =>
+      population = new Population populationSize, initTrader, runTrader
 
-    for i in [1...generationSize]
-      population.nextGeneration()
-  .run()
+      for i in [1...generationSize]
+        population.nextGeneration()
+    .run()
+  else
+    Fiber =>
+      trader = initTrader()
+      runTrader(trader)
+
+      console.log("Finished backtest!")
+
+      p = trader.sandbox.portfolio.positions
+      a = undefined;
+      for x of trader.sandbox.portfolio.positions
+        console.log("#{x.toUpperCase()}: #{p[x].amount}")
+        a = x.toUpperCase()
+
+      console.log("(#{trader.getWorthInCurr()} #{a})")
+
+    .run()
