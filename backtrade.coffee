@@ -28,7 +28,14 @@ if require.main == module
     .option('-g,--genetic <popSize,genSize>','Use genetic algorithm for optimization [0,0]', (val)->val.split(',').map(Number))
     .option('-b,--begin [value]','Datetime to start the backtest',Date.parse)
     .option('-e,--end [value]','Datetime to end the backtest (exclusive)',Date.parse)
+    .option('-v, --verbose', 'Verbosity level (can be increased by repeating)', ((v, total) -> total + 1), 0)
     .parse process.argv
+
+  if program.verbose?
+    if program.verbose >= 2
+      logger.level = 'debug'
+    if program.verbose >= 1
+      logger.level = 'info'
 
   config = CSON.parseCSONFile './config.cson'
 
