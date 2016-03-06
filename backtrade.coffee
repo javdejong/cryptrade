@@ -16,9 +16,6 @@ logger.remove logger.transports.Console
 logger.add logger.transports.Console,{level:'warning',colorize:true,timestamp:true}
 
 
-random_interval = (from,to) ->
-  Math.random() * (to - from) + from
-
 if require.main == module
   program = require('commander')
   program

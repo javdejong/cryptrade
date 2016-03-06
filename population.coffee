@@ -1,5 +1,7 @@
 Genome = require './genome'
 _ = require 'underscore'
+MersenneTwister = require('mersenne-twister')
+generator = new MersenneTwister(42)
 
 # Base class for ranking and creating populations
 class Population
@@ -56,7 +58,7 @@ class Population
     participants = []
     # select random participants
     for index in [0..@tournamentParticipants]
-      randomIndex = Math.floor @genomes.length * Math.random()
+      randomIndex = Math.floor @genomes.length * generator.random_long()
       participants.push @genomes[randomIndex]
     # rank participants
     participants = _.sortBy participants, (genome) -> genome.cost()
@@ -88,8 +90,8 @@ class Population
       # mutate the genomes
       # TODO: Ugly, we use an instance of genome to manipulate an array. Better to make
       #       mutate() a class method instead of an instance method
-      c1 = a.mutate(c1) if Math.random() < @mutationChance
-      c2 = b.mutate(c2) if Math.random() < @mutationChance
+      c1 = a.mutate(c1) if generator.random_long() < @mutationChance
+      c2 = b.mutate(c2) if generator.random_long() < @mutationChance
 
       # add the new genomes to the next generation
       nextGeneration.push(new Genome(c1, @traderInit, @traderRun))

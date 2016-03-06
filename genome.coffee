@@ -4,6 +4,8 @@
 # They contain the logic to get a so called cost which is needed to compare
 # a Population.
 deepclone = require('./utils').deepclone
+MersenneTwister = require('mersenne-twister')
+generator = new MersenneTwister(42)
 
 class Genome
 
@@ -35,7 +37,7 @@ class Genome
   set_value_interval: (conf,a) ->
 
     random_interval = (from,to) ->
-      Math.random() * (to - from) + from
+      generator.random_long() * (to - from) + from
 
     b = conf[a]
     try
@@ -127,6 +129,6 @@ class Genome
 
   # Helper function which returns a random index from the given array
   getRandomIndex: (array) ->
-    Math.floor(array.length * Math.random())
+    Math.floor(array.length * generator.random_long())
 
 module.exports = Genome
