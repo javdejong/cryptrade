@@ -138,10 +138,13 @@ if require.main == module
       bar.instrument = config.instrument
       trader.handle bar
 
-  getInitWorth = ->
-    price = data[config.init_data_length].close
-    worth = pl.initial_portfolio[asset] * price + pl.initial_portfolio[curr]
-    worth
+  getBuyHoldWorth = ->
+    init_price = data[config.init_data_length-1].close
+    last_price = data[data.length-1].close
+
+    amnt_asset = pl.initial_portfolio[asset] + pl.initial_portfolio[curr] / init_price
+    cur_worth = amnt_asset * last_price
+    cur_worth
 
   logFinalStats = (cur_worth, positions) ->
     if positions?
@@ -149,7 +152,7 @@ if require.main == module
         console.log("#{x.toUpperCase()}: #{positions[x].amount}")
 
     cur_worth = Math.round(1e6 * cur_worth) / 1e6
-    eff_buyhold = Math.round(1000 * cur_worth / getInitWorth()) / 1000
+    eff_buyhold = Math.round(1000 * cur_worth / getBuyHoldWorth()) / 1000
     console.log("(Total: #{cur_worth} #{curr.toUpperCase()})")
     console.log("Efficiency: #{eff_buyhold}x")
 
