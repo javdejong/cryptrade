@@ -34,8 +34,10 @@ if require.main == module
   if program.verbose?
     if program.verbose >= 2
       logger.level = 'debug'
-    if program.verbose >= 1
+    else if program.verbose >= 1
       logger.level = 'info'
+  else
+    logger.level ='warn'
 
   config = CSON.parseCSONFile './config.cson'
 
