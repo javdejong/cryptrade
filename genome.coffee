@@ -13,7 +13,7 @@ class Genome
   values: {}
 
   # If no values are given, it defaults to `@initial()`
-  constructor: (@values, traderInit, traderRun) ->
+  constructor: (@values, traderInit, traderRun, all_data) ->
     trader = traderInit()
 
     conf = trader.context.gconfig
@@ -28,9 +28,22 @@ class Genome
       else
         conf = @initial(conf)
 
-    traderRun(trader)
 
-    @score = trader.getWorthInCurr()
+    @score = 0
+
+    for data in all_data
+      curtrader = traderInit()
+      curconf = curtrader.context.gconfig
+
+      if conf?
+        for a of conf
+          curconf[a] = conf[a]
+
+      traderRun(curtrader, data)
+      @score = @score + curtrader.getWorthInCurr()
+      curtrader.clean()
+
+    @score = @score / all_data.length
 
     trader.clean()
 

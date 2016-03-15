@@ -34,8 +34,8 @@ class Population
 
   # @param [Integer] populationSize The size of the population
   # @param [Integer] maxGenerationCount The maximum number of generations (iterations)
-  constructor: (@populationSize = 1000, @traderInit, @traderRun) ->
-    @genomes.push new Genome(null, @traderInit, @traderRun) for i in [0...@populationSize]
+  constructor: (@populationSize = 1000, @traderInit, @traderRun, @all_data) ->
+    @genomes.push new Genome(null, @traderInit, @traderRun, @all_data) for i in [0...@populationSize]
     @rank()
     @afterGeneration()
 
@@ -73,8 +73,8 @@ class Population
     # the fittest two survive
     if @elitism
       # TODO: Don't need to rerun these two
-      nextGeneration.push(new Genome(@genomes[@genomes.length - 1].values, @traderInit, @traderRun))
-      nextGeneration.push(new Genome(@genomes[@genomes.length - 2].values, @traderInit, @traderRun))
+      nextGeneration.push(new Genome(@genomes[@genomes.length - 1].values, @traderInit, @traderRun, @all_data))
+      nextGeneration.push(new Genome(@genomes[@genomes.length - 2].values, @traderInit, @traderRun, @all_data))
       skip = 2
 
     for index in [0...@genomes.length-skip] by 2
@@ -94,8 +94,8 @@ class Population
       c2 = b.mutate(c2) if generator.random_long() < @mutationChance
 
       # add the new genomes to the next generation
-      nextGeneration.push(new Genome(c1, @traderInit, @traderRun))
-      nextGeneration.push(new Genome(c2, @traderInit, @traderRun))
+      nextGeneration.push(new Genome(c1, @traderInit, @traderRun, @all_data))
+      nextGeneration.push(new Genome(c2, @traderInit, @traderRun, @all_data))
 
     @genomes = nextGeneration
 

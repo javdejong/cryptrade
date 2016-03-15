@@ -165,7 +165,7 @@ if require.main == module
     generationSize = Math.max(program.genetic[1], 1)
 
     Fiber =>
-      population = new Population populationSize, initTrader, runTrader
+      population = new Population populationSize, initTrader, runTrader, all_data
 
       for i in [1...generationSize]
         population.nextGeneration()
