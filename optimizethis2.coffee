@@ -10,11 +10,11 @@ class GConfig
   constructor: (nbars) ->
     @buy_threshold = [-1,5, parseFloat]
     @short = [2,0.9*nbars,parseInt]  # Minimum is 2, otherwise crash
-    @long = [1.001,100.0,parseFloat]
+    @long = [1.001,10.0,parseFloat]
 
     @macd_1 = [3,0.9*nbars,parseInt] # fast
-    @macd_2 = [1.001,100.0,parseFloat] # slow, as function of fast
-    @macd_3 = [0.001,0.999,parseFloat] # signal, as a function of fast
+    @macd_2 = [1.001,10.0,parseFloat] # slow, as function of fast
+    @macd_3 = [0.1,0.999,parseFloat] # signal, as a function of fast
 
 
 init: (context)->
