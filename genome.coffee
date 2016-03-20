@@ -47,7 +47,7 @@ class Genome
 
     trader.clean()
 
-  set_value_interval: (conf,a) ->
+  @set_value_interval: (conf,a) ->
 
     random_interval = (from,to) ->
       generator.random_long() * (to - from) + from
@@ -64,7 +64,7 @@ class Genome
   initial: (conf) ->
 
     for a of conf
-      @set_value_interval(conf,a)
+      Genome.set_value_interval(conf,a)
 
     @values = conf
 
@@ -87,33 +87,64 @@ class Genome
     else
       -1
   ###
-  # Mutate this genome by reavaluating a random element
-  mutate: (values) ->
+
+  # Class methods for mutating and cross overs.
+  # All these functions are non-destructive on their input parameters
+
+  # "Small mutate" uses the passed-in value, and perturbs it a little.
+  # The "big mutate" function instead re-evaluates the GConfig line,
+  # not caring at all about the current value.
+
+  @small_mutate: (values, origvalues, frac) ->
+    values = deepclone(values)  # Non-destructive
+
+    if not frac?
+      frac = 0.5
     value_names = (a for a,b of values)
-    index = @getRandomIndex(value_names)
+    index = Genome.getRandomIndex(value_names)
     item_name = value_names[index]
-    values[item_name] = deepclone(@origvalues[item_name])
-    @set_value_interval(values,item_name)
+
+    b = origvalues[item_name]
+
+    newval = values[item_name] * (frac + 2*frac * generator.random_long())
+    # Make sure the perturbed value is still in the allowed range
+    newval = Math.min(newval, b[1])
+    newval = Math.max(newval, b[0])
+
+    newval = b[2](newval)
+
+    values[item_name] = newval
+    values
+
+
+  @big_mutate: (values, origvalues) ->
+    values = deepclone(values) # Non-destructive
+
+    value_names = (a for a,b of values)
+    index = Genome.getRandomIndex(value_names)
+    item_name = value_names[index]
+    values[item_name] = deepclone(origvalues[item_name])  # TODO: Check if the clone here is really necessary
+    Genome.set_value_interval(values, item_name)
+    values
 
   # Perform a uniform crossover with the given genome
   # A mixingratio of 1.0 means that half/half are mixed. So we divide by two below
-  # @param [Genome] genome
+  # @param [Genome] genome A's values
+  # @param [Genome] genome B's values
   # @param [Float] mixingRatio How much should get mixed?
   # @return [Array<Object>] the two new Value objects
+  @crossover: (values_a, values_b, mixingRatio) ->
+    value_names = (a for a,b of values_a)
 
-  crossover: (genome, mixingRatio) ->
-    value_names = (a for a,b of @values)
-
-    cpP1 = deepclone @values
-    cpP2 = deepclone genome.values
-
+    cpP1 = deepclone values_a
+    cpP2 = deepclone values_b
 
     # Copy original values
     for i in [0...value_names.length]
       if (i / value_names.length) > (mixingRatio / 2.0)
         break
 
-      index = @getRandomIndex value_names
+      index = Genome.getRandomIndex value_names
       item_name = value_names[index]
       # Switch
       temp = cpP1[item_name]
@@ -141,7 +172,7 @@ class Genome
     return true
 
   # Helper function which returns a random index from the given array
-  getRandomIndex: (array) ->
+  @getRandomIndex: (array) ->
     Math.floor(array.length * generator.random_long())
 
 module.exports = Genome

@@ -8,8 +8,11 @@ class Population
   # @property [Array<Genome>] All the genomes of this population
   genomes: []
 
-  # @property [Float] The chance of a Genome to mutate
-  mutationChance: .15
+  # @property [Float] The chance of a Genome to mutate (based on its current values)
+  smallMutationChance: .4
+
+  # @property [Float] The chance of a Genome to mutate (based on the originally specified range)
+  bigMutationChance: .05
 
   # @property [Boolean] If true, the two best Genomes will survive without mutation or mating
   elitism: true
@@ -82,16 +85,20 @@ class Population
       a = @tournamentSelect()
       b = @tournamentSelect()
 
+      origvalues = a.origvalues # Aren't mutated
+
       # perform a crossover if the maximum hasn't been reached
-      children = a.crossover b, @mixingRatio
+      children = Genome.crossover(a.values, b.values, @mixingRatio)
       c1 = children[0]
       c2 = children[1]
 
       # mutate the genomes
-      # TODO: Ugly, we use an instance of genome to manipulate an array. Better to make
-      #       mutate() a class method instead of an instance method
-      c1 = a.mutate(c1) if generator.random_long() < @mutationChance
-      c2 = b.mutate(c2) if generator.random_long() < @mutationChance
+      c1 = Genome.small_mutate(c1, origvalues) if generator.random_long() < @smallMutationChance
+      c2 = Genome.small_mutate(c2, origvalues) if generator.random_long() < @smallMutationChance
+
+      # An even bigger mutation (entire re-evaluation)
+      c1 = Genome.small_mutate(c1, origvalues) if generator.random_long() < @bigMutationChance
+      c2 = Genome.small_mutate(c2, origvalues) if generator.random_long() < @bigMutationChance
 
       # add the new genomes to the next generation
       nextGeneration.push(new Genome(c1, @traderInit, @traderRun, @all_data))

@@ -33,9 +33,7 @@ module.exports =
   # Taken from http://coffeescriptcookbook.com/chapters/classes_and_objects/cloning
   deepclone: (obj) ->
     clone = (obj) ->
-      # The "isnt function" part is new, to also clone functions/classes. Might results in other weird stuff
-      # being cloned as well?
-      if not obj? or (typeof obj isnt 'object' and typeof obj isnt 'function')
+      if not obj? or (typeof obj isnt 'object')
         return obj
 
       if obj instanceof Date
