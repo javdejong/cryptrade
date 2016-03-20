@@ -17,7 +17,7 @@ class Population
   # @property [Boolean] If true, the two best Genomes will survive without mutation or mating
   elitism: true
 
-  # @property [Float] Determines the amount of values to be copied from parents
+  # @property [Float] Determines the maximum amount of values to be copied from parents
   mixingRatio: .8
 
   # @property [Integer] The number of the current generation
@@ -79,7 +79,7 @@ class Population
       nextGeneration.push(@genomes[@genomes.length - 2])
       skip = 2
 
-    for index in [0...@genomes.length-skip] by 2
+    for index in [skip...@genomes.length] by 2
       # do a tournament selection
       a = @tournamentSelect()
       b = @tournamentSelect()
@@ -87,13 +87,16 @@ class Population
       origvalues = a.origvalues # Aren't mutated
 
       # perform a crossover if the maximum hasn't been reached
-      children = Genome.crossover(a.values, b.values, @mixingRatio)
+      curMix = @mixingRatio * generator.random_long()
+      children = Genome.crossover(a.values, b.values, curMix)
       c1 = children[0]
       c2 = children[1]
 
+      force_mutate = curMix <= (1 / ((x for x,y of a.values).length)) # In this case, the cross-over did not do anything
+
       # mutate the genomes
-      c1 = Genome.small_mutate(c1, origvalues) if generator.random_long() < @smallMutationChance
-      c2 = Genome.small_mutate(c2, origvalues) if generator.random_long() < @smallMutationChance
+      c1 = Genome.small_mutate(c1, origvalues) if (generator.random_long() < @smallMutationChance or force_mutate)
+      c2 = Genome.small_mutate(c2, origvalues) if (generator.random_long() < @smallMutationChance or force_mutate)
 
       # An even bigger mutation (entire re-evaluation)
       c1 = Genome.small_mutate(c1, origvalues) if generator.random_long() < @bigMutationChance
