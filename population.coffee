@@ -75,9 +75,8 @@ class Population
 
     # the fittest two survive
     if @elitism
-      # TODO: Don't need to rerun these two
-      nextGeneration.push(new Genome(@genomes[@genomes.length - 1].values, @traderInit, @traderRun, @all_data))
-      nextGeneration.push(new Genome(@genomes[@genomes.length - 2].values, @traderInit, @traderRun, @all_data))
+      nextGeneration.push(@genomes[@genomes.length - 1])
+      nextGeneration.push(@genomes[@genomes.length - 2])
       skip = 2
 
     for index in [0...@genomes.length-skip] by 2
