@@ -26,7 +26,7 @@ if require.main == module
     .option('-s,--initial [value]','Number of trades that are used for initialization (ex. 248)',parseInt)
     .option('-p,--portfolio <asset,curr>','Initial portfolio (ex. 0,5000)',(val)->val.split(',').map(Number))
     .option('-f,--fee [value]','Fee on every trade in percent (ex. 0.5)',parseFloat)
-    .option('-g,--genetic <popSize,genSize>','Use genetic algorithm for optimization [0,0]', (val)->val.split(',').map(Number))
+    .option('-g,--genetic <popSize,genSize[,genDecrease,minGenSize]>','Use genetic algorithm for optimization [0,0]', (val)->val.split(',').map(Number))
     .option('-b,--begin [value]','Datetime to start the backtest',Date.parse)
     .option('-e,--end [value]','Datetime to end the backtest (exclusive)',Date.parse)
     .option('-v, --verbose', 'Verbosity level (can be increased by repeating)', ((v, total) -> total + 1), 0)
@@ -164,8 +164,15 @@ if require.main == module
     populationSize = Math.max(program.genetic[0], 1)
     generationSize = Math.max(program.genetic[1], 1)
 
+    popDecrease = 1.0
+    minPop = populationSize
+
+    if program.genetic.length == 4
+      popDecrease = program.genetic[2]
+      minPop = program.genetic[3]
+
     Fiber =>
-      population = new Population populationSize, initTrader, runTrader, all_data
+      population = new Population populationSize, initTrader, runTrader, all_data, popDecrease, minPop
 
       for i in [1...generationSize]
         population.nextGeneration()

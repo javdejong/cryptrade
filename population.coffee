@@ -31,16 +31,21 @@ class Population
 
   afterGeneration: ->
     console.log("Round ##{@currentGeneration}:")
-    console.log(@genomes[@populationSize-1].cost())
-    console.log(@genomes[@populationSize-1].values)
+    console.log(@genomes[@genomes.length-1].cost())
+    console.log(@genomes[@genomes.length-1].values)
 
 
   # @param [Integer] populationSize The size of the population
   # @param [Integer] maxGenerationCount The maximum number of generations (iterations)
-  constructor: (@populationSize = 1000, @traderInit, @traderRun, @all_data) ->
+  constructor: (@populationSize = 1000, @traderInit, @traderRun, @all_data, @popDecrease = 1.0, @minPop) ->
+    if not @minPop?
+      @minPop = @populationSize
+    @_targetPopSize = @populationSize
+
     @genomes.push new Genome(null, @traderInit, @traderRun, @all_data) for i in [0...@populationSize]
     @rank()
     @afterGeneration()
+
 
   # Ranks all genomes according to their cost (higher is better)
   rank: ->
@@ -79,7 +84,11 @@ class Population
       nextGeneration.push(@genomes[@genomes.length - 2])
       skip = 2
 
-    for index in [skip...@genomes.length] by 2
+    @_targetPopSize = Math.max(@_targetPopSize * @popDecrease, @minPop)
+    newSize = parseInt(@_targetPopSize)
+
+    start = @genomes.length - newSize + skip
+    for index in [start...@genomes.length] by 2
       # do a tournament selection
       a = @tournamentSelect()
       b = @tournamentSelect()
