@@ -91,7 +91,7 @@ class Genome
   # Class methods for mutating and cross overs.
   # All these functions are non-destructive on their input parameters
 
-  # "Small mutate" uses the passed-in value, and perturbs it a little.
+  # "Small mutate" uses the passed-in value, and perturbs it a little based on the value range.
   # The "big mutate" function instead re-evaluates the GConfig line,
   # not caring at all about the current value.
 
@@ -99,14 +99,14 @@ class Genome
     values = deepclone(values)  # Non-destructive
 
     if not frac?
-      frac = 0.5
+      frac = 0.1 # In either direction
     value_names = (a for a,b of values)
     index = Genome.getRandomIndex(value_names)
     item_name = value_names[index]
 
     b = origvalues[item_name]
 
-    newval = values[item_name] * (frac + 2*frac * generator.random_long())
+    newval = values[item_name] + frac * (2 * generator.random_long() - 1) * (b[1] - b[0])
     # Make sure the perturbed value is still in the allowed range
     newval = Math.min(newval, b[1])
     newval = Math.max(newval, b[0])
