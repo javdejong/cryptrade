@@ -17,6 +17,8 @@ class Population
   # @property [Boolean] If true, the two best Genomes will survive without mutation or mating
   elitism: true
 
+  mutateEliteInsteadChance: .05
+
   # @property [Float] Determines the maximum amount of values to be copied from parents
   mixingRatio: .8
 
@@ -88,28 +90,34 @@ class Population
     newSize = parseInt(@_targetPopSize)
 
     start = @genomes.length - newSize + skip
+
     for index in [start...@genomes.length] by 2
-      # do a tournament selection
-      a = @tournamentSelect()
-      b = @tournamentSelect()
+      if generator.random_long() < @mutateEliteInsteadChance
+        # Just mutate the elite two instead of doing crossovers
+        c1 = Genome.small_mutate(@genomes[@genomes.length - 1].values, @genomes[@genomes.length - 1].origvalues)
+        c2 = Genome.small_mutate(@genomes[@genomes.length - 2].values, @genomes[@genomes.length - 2].origvalues)
+      else
+        # do a tournament selection
+        a = @tournamentSelect()
+        b = @tournamentSelect()
 
-      origvalues = a.origvalues # Aren't mutated
+        origvalues = a.origvalues # Aren't mutated
 
-      # perform a crossover if the maximum hasn't been reached
-      curMix = @mixingRatio * generator.random_long()
-      children = Genome.crossover(a.values, b.values, curMix)
-      c1 = children[0]
-      c2 = children[1]
+        # perform a crossover if the maximum hasn't been reached
+        curMix = @mixingRatio * generator.random_long()
+        children = Genome.crossover(a.values, b.values, curMix)
+        c1 = children[0]
+        c2 = children[1]
 
-      force_mutate = curMix <= (1 / ((x for x,y of a.values).length)) # In this case, the cross-over did not do anything
+        force_mutate = curMix <= (1 / ((x for x,y of a.values).length)) # In this case, the cross-over did not do anything
 
-      # mutate the genomes
-      c1 = Genome.small_mutate(c1, origvalues) if (generator.random_long() < @smallMutationChance or force_mutate)
-      c2 = Genome.small_mutate(c2, origvalues) if (generator.random_long() < @smallMutationChance or force_mutate)
+        # mutate the genomes
+        c1 = Genome.small_mutate(c1, origvalues) if (generator.random_long() < @smallMutationChance or force_mutate)
+        c2 = Genome.small_mutate(c2, origvalues) if (generator.random_long() < @smallMutationChance or force_mutate)
 
-      # An even bigger mutation (entire re-evaluation)
-      c1 = Genome.small_mutate(c1, origvalues) if generator.random_long() < @bigMutationChance
-      c2 = Genome.small_mutate(c2, origvalues) if generator.random_long() < @bigMutationChance
+        # An even bigger mutation (entire re-evaluation)
+        c1 = Genome.small_mutate(c1, origvalues) if generator.random_long() < @bigMutationChance
+        c2 = Genome.small_mutate(c2, origvalues) if generator.random_long() < @bigMutationChance
 
       # add the new genomes to the next generation
       nextGeneration.push(new Genome(c1, @traderInit, @traderRun, @all_data))
