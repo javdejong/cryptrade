@@ -29,6 +29,7 @@ if require.main == module
     .option('-g,--genetic <popSize,genSize[,genDecrease,minGenSize]>','Use genetic algorithm for optimization [0,0]', (val)->val.split(',').map(Number))
     .option('-b,--begin [value]','Datetime to start the backtest',Date.parse)
     .option('-e,--end [value]','Datetime to end the backtest (exclusive)',Date.parse)
+    .option('-m,--mean [value]','Mean method [arithmetic, geometric, harmonic]', 'harmonic')
     .option('-v, --verbose', 'Verbosity level (can be increased by repeating)', ((v, total) -> total + 1), 0)
     .parse process.argv
 
@@ -172,7 +173,7 @@ if require.main == module
       minPop = program.genetic[3]
 
     Fiber =>
-      population = new Population populationSize, initTrader, runTrader, all_data, popDecrease, minPop
+      population = new Population populationSize, initTrader, runTrader, all_data, program.mean, popDecrease, minPop
 
       for i in [1...generationSize]
         population.nextGeneration()

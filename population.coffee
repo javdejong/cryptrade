@@ -39,12 +39,12 @@ class Population
 
   # @param [Integer] populationSize The size of the population
   # @param [Integer] maxGenerationCount The maximum number of generations (iterations)
-  constructor: (@populationSize = 1000, @traderInit, @traderRun, @all_data, @popDecrease = 1.0, @minPop) ->
+  constructor: (@populationSize = 1000, @traderInit, @traderRun, @all_data, @mean_method="harmonic", @popDecrease = 1.0, @minPop) ->
     if not @minPop?
       @minPop = @populationSize
     @_targetPopSize = @populationSize
 
-    @genomes.push new Genome(null, @traderInit, @traderRun, @all_data) for i in [0...@populationSize]
+    @genomes.push new Genome(null, @traderInit, @traderRun, @all_data, @mean_method) for i in [0...@populationSize]
     @rank()
     @afterGeneration()
 
@@ -120,8 +120,8 @@ class Population
         c2 = Genome.small_mutate(c2, origvalues) if generator.random_long() < @bigMutationChance
 
       # add the new genomes to the next generation
-      nextGeneration.push(new Genome(c1, @traderInit, @traderRun, @all_data))
-      nextGeneration.push(new Genome(c2, @traderInit, @traderRun, @all_data))
+      nextGeneration.push(new Genome(c1, @traderInit, @traderRun, @all_data, @mean_method))
+      nextGeneration.push(new Genome(c2, @traderInit, @traderRun, @all_data, @mean_method))
 
     @genomes = nextGeneration
 

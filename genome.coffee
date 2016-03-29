@@ -13,7 +13,7 @@ class Genome
   values: {}
 
   # If no values are given, it defaults to `@initial()`
-  constructor: (@values, traderInit, traderRun, all_data) ->
+  constructor: (@values, traderInit, traderRun, all_data, mean_method="harmonic") ->
     trader = traderInit()
 
     conf = trader.context.gconfig
@@ -29,7 +29,7 @@ class Genome
         conf = @initial(conf)
 
 
-    @score = 0
+    scores = []
 
     for data in all_data
       curtrader = traderInit()
@@ -40,10 +40,26 @@ class Genome
           curconf[a] = conf[a]
 
       traderRun(curtrader, data)
-      @score = @score + curtrader.getWorthInCurr()
+      scores.push(curtrader.getWorthInCurr())
       curtrader.clean()
 
-    @score = @score / all_data.length
+    @score = 0
+    if mean_method == "arithmetic"
+      for s in scores
+        @score = @score + s
+      @score = @score / scores.length
+    else if mean_method == "geometric"
+      @score = 1
+      for s in scores
+        @score = @score * s
+      @score = Math.pow(@score, 1/scores.length)
+    else if mean_method == "harmonic"
+      @score = 0
+      for s in scores
+        @score = @score + 1/s
+      @score = scores.length / @score
+    else
+      throw new Error("Unknown mean method: " + mean_method)
 
     trader.clean()
 
