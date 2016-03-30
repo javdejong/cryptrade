@@ -8,7 +8,7 @@ class Instrument
     @high = []
     @close = []
     @volumes = []
-    @bars = []
+    @ticks = []
     @pair = @id.split('_')
 
   asset: ->
@@ -24,7 +24,7 @@ class Instrument
       @high.shift()
       @close.shift()
       @volumes.shift()
-      @bars.shift()
+      @ticks.shift()
     @open.push data.open
     @low.push data.low
     @high.push data.high
@@ -32,16 +32,16 @@ class Instrument
     @volumes.push data.volume
     @price = data.close
     @volume = data.volume
-    @bars.push data
+    @ticks.push data
 
   vwap: (period)->
-    if period < @bars.length
-      idx = @bars.length - period
+    if period < @ticks.length
+      idx = @ticks.length - period
     else
       idx = 0
     flux = 0
     volume = 0
-    while idx < @bars.length
+    while idx < @ticks.length
       flux += @volumes[idx] * @close[idx]
       volume += @volumes[idx]
       idx++

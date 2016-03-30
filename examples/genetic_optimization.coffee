@@ -104,7 +104,7 @@ handle: (context, data)->
     context.macd.init(instrument.close[...-1])
     context.init_done = true
 
-  bar = instrument.bars[data_length-1]
+  bar = instrument.ticks[data_length-1]
 
   context.macd.update(bar.close)
 
